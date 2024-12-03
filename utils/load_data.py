@@ -133,3 +133,47 @@ def load_multi_trajs_data(path, num_agent=16, nvar=11):
     state_z = np.hstack(( z_init, vz_init, az_init, z_fin, vz_fin, az_fin  ))
 
     return TrajDataset(inp, state_x, state_y, state_z, c_pred, centers, radiis), min_inp, max_inp, inp_mean, inp_std
+
+
+class ConditionDataset(Dataset):
+    def __init__(self, x_init, y_init, z_init, x_fin, y_fin, z_fin, centers, radiis):
+        self.x_init, self.y_init, self.z_init =  x_init, y_init, z_init
+        self.x_fin, self.y_fin, self.z_fin = x_fin, y_fin, z_fin
+        self.centers, self.radiis = centers, radiis
+
+    def __len__(self):
+        return len(self.x_init)
+
+    def __getitem__(self, idx):
+        return (
+            self.x_init[idx], self.y_init[idx], self.z_init[idx], 
+            self.x_fin[idx], self.y_fin[idx], self.z_fin[idx], 
+            self.centers[idx], self.radiis[idx]
+        )
+    
+
+def get_varying_bound_conditions_num_agents(num_agent=32):
+
+    dir = Path(__file__).parent.parent / "resources" / "data" / "test_data"
+
+    if num_agent==32:
+        data = np.load(dir / "states_30_32_agents.npz", allow_pickle=True)
+    elif num_agent==16:
+        data = np.load(dir / "states_0_16_agents.npz", allow_pickle=True)
+    
+    init_data = data['init_pos_data'].astype(np.float32)
+    fin_data = data['fin_pos_data'].astype(np.float32)
+    centers = data["center"].astype(np.float32)
+    radiis = data["radii"].astype(np.float32)
+
+    return ConditionDataset(
+        x_init = init_data[:, 0: num_agent],
+        y_init = init_data[:, num_agent : 2* num_agent],
+        z_init = init_data[:, 2*num_agent : 3 * num_agent],
+
+        x_fin = fin_data[:, 0: num_agent],
+        y_fin = fin_data[:, num_agent : 2* num_agent],
+        z_fin = fin_data[:, 2*num_agent : 3 * num_agent],
+        centers = centers,
+        radiis = radiis
+    )
