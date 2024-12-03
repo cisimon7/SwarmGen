@@ -1,0 +1,10 @@
+resources/data/*
+resources/results/*
+resources/results/*
+resources/weights/*
+.venv
+models/sampler/rnn.py
+models/sampler/transformer.py
+train_sampler_transformer_encoder.ipynb
+train_sampler_transformer_decoder.ipynb
+train_sampler_rnn.ipynb
