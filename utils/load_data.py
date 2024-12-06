@@ -177,3 +177,24 @@ def get_varying_bound_conditions_num_agents(num_agent=32):
         centers = centers,
         radiis = radiis
     )
+
+
+def get_varying_bound_dataset_num_agent(P, num_agent=16, nvar=11):
+
+    dir = Path(__file__).parent.parent / "resources" / "data" / "traj_data" / f"varying_bounds_{num_agent}"
+
+    all_datasets = []
+    for eps_idx in range(10) :
+        data = np.load(dir / f"2k_trajs_{eps_idx}.npz", allow_pickle=True)
+        primal_sol_x = data["primal_sol_x"].astype(np.float32)
+        primal_sol_y = data["primal_sol_y"].astype(np.float32)
+        primal_sol_z = data["primal_sol_z"].astype(np.float32)
+        
+        traj_data = np.stack([primal_sol_x, primal_sol_y, primal_sol_z], axis=-1).reshape(-1, num_agent, nvar, 3)
+        traj_data = th.from_numpy(traj_data).permute(0, 2, 1, 3)
+
+        # print(traj_data.shape, data["center"].shape, data["radii"].shape)
+        dataset_traj = BoundedTrajectoryDataset(traj_data, np.tile(data["center"], (traj_data.shape[0], 1)), np.tile(data["radii"], (traj_data.shape[0], 1)), P, num_agent, nvar)
+        all_datasets.append(dataset_traj)
+
+    return th.utils.data.ConcatDataset(all_datasets)
