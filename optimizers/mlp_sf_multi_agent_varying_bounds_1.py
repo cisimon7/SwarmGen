@@ -146,7 +146,7 @@ class InitModelCNN(nn.Module):
 		proj_y_loss = 0.5*self.rcl_loss(primal_sol_y, c_y_pred)
 		proj_z_loss = 0.5*self.rcl_loss(primal_sol_z, c_z_pred)
   
-		proj_loss = proj_x_loss+proj_y_loss+proj_z_loss
+		proj_loss = proj_x_loss + proj_y_loss + proj_z_loss
 		loss = fixed_point_loss + proj_loss
  
 		return loss, fixed_point_loss, primal_loss, proj_loss
@@ -193,18 +193,18 @@ class MLP(nn.Module):
 		self.mlp = nn.Sequential(
 			nn.Linear(inp_dim, hidden_dim),
 			nn.BatchNorm1d(hidden_dim),
-			nn.ReLU(),
-			# nn.LeakyReLU(inplace=True),
+			nn.LeakyReLU(inplace=True),
+			# nn.Softplus(),
 
 			nn.Linear(hidden_dim, hidden_dim),
 			nn.BatchNorm1d(hidden_dim),
-			nn.ReLU(),
-			# nn.LeakyReLU(inplace=True),
+			nn.LeakyReLU(inplace=True),
+			# nn.Softplus(),
 
 			nn.Linear(hidden_dim, 256),
 			nn.BatchNorm1d(256),
-			nn.ReLU(),
-			# nn.LeakyReLU(inplace=True),
+			nn.LeakyReLU(inplace=True),
+			# nn.Softplus(),
 			
 			nn.Linear(256, out_dim),
 		)

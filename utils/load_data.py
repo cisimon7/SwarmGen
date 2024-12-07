@@ -85,7 +85,7 @@ class TrajDataset(Dataset):
     
 
 def load_multi_trajs_data(path, num_agent=16, nvar=11):
-    dir = Path(__file__).parent.parent / "resources" / "data" / "multi_data"
+    dir = Path(__file__).parent.parent / "resources" / "data" #/ "multi_data"
     data = np.load(dir / path)
     condition_data = data["condition"].astype(np.float32)       # num_batch x 3 x num_agent x 6  num_batch, 18, num_agent
     primals_data = data["primals"].astype(np.float32)           # num_batch x 3 x num_agent x 11
