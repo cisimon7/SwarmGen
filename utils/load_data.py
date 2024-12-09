@@ -152,14 +152,10 @@ class ConditionDataset(Dataset):
         )
     
 
-def get_varying_bound_conditions_num_agents(num_agent=32):
+def get_varying_bound_conditions_num_agents(num_agent=32, idx=0):
 
     dir = Path(__file__).parent.parent / "resources" / "data" / "test_data"
-
-    if num_agent==32:
-        data = np.load(dir / "states_30_32_agents.npz", allow_pickle=True)
-    elif num_agent==16:
-        data = np.load(dir / "states_0_16_agents.npz", allow_pickle=True)
+    data = np.load(dir / f"poses_{idx}_agent_{num_agent}_test.npz", allow_pickle=True)
     
     init_data = data['init_pos_data'].astype(np.float32)
     fin_data = data['fin_pos_data'].astype(np.float32)
