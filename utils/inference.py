@@ -163,6 +163,14 @@ def run_pipeline(
 				x_ell.cpu().numpy(), y_ell.cpu().numpy(), z_ell.cpu().numpy(), 
 				a_ell.cpu().numpy(), b_ell.cpu().numpy(), c_ell.cpu().numpy()
 			)
+		elif comp_type == "base_init":
+			primal_sol_x_base, primal_sol_y_base, primal_sol_z_base, primal_residual_base, dual_residual_base = jax.block_until_ready(multi_agent_base.solve(
+				c_x_pred_jnp, c_y_pred_jnp, c_z_pred_jnp, 
+				jnp.zeros_like(lamda_x_jnp), jnp.zeros_like(lamda_y_jnp), jnp.zeros_like(lamda_z_jnp), 
+				state_x_test_jnp, state_y_test_jnp, state_z_test_jnp,
+				x_ell.cpu().numpy(), y_ell.cpu().numpy(), z_ell.cpu().numpy(), 
+				a_ell.cpu().numpy(), b_ell.cpu().numpy(), c_ell.cpu().numpy()
+			))
 		elif comp_type == "sf_cpred":
 			primal_sol_x_base, primal_sol_y_base, primal_sol_z_base, _, _, primal_residual_base, dual_residual_base = jax.block_until_ready(multi_agent_learned(
 				c_x_pred_jnp, c_y_pred_jnp, c_z_pred_jnp, 
@@ -243,6 +251,18 @@ def run_pipeline(
 		ddot_base = jnp.stack([x_ddot_base, y_ddot_base, z_ddot_base], axis=-1)
 		mean_smoothness_base = jnp.linalg.norm(ddot_base, axis=-1).sum(axis=-1).mean()
 
+		x_traj_batch = np.dot(primal_sol_x.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_batch = np.dot(primal_sol_y.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_batch = np.dot(primal_sol_z.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
+		x_traj_base_batch = np.dot(primal_sol_x_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_base_batch = np.dot(primal_sol_y_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_base_batch = np.dot(primal_sol_z_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
+		x_traj_cpred = np.dot(c_x_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_cpred = np.dot(c_y_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_cpred = np.dot(c_z_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
 		return (
 			primal_residual[:, best_idx], primal_residual_base[:, best_idx_base], 
 			dual_residual[:, best_idx], dual_residual_base[:, best_idx_base]
@@ -250,7 +270,15 @@ def run_pipeline(
 			x_traj, y_traj, z_traj,
 			x_traj_base, y_traj_base, z_traj_base,
 			x_traj_init, y_traj_init, z_traj_init,
-		), (mean_smoothness, mean_smoothness_base)
+		), (mean_smoothness, mean_smoothness_base), (
+			x_traj_cpred, y_traj_cpred, z_traj_cpred, 
+			x_traj_batch, y_traj_batch, z_traj_batch, 
+			x_traj_base_batch, y_traj_base_batch, z_traj_base_batch, 
+			np.asarray(primal_residual).T, np.asarray(dual_residual).T
+		), (
+			np.asarray(primal_sol_x), np.asarray(primal_sol_y), np.asarray(primal_sol_z), 
+			np.asarray(c_x_pred.detach().cpu()), np.asarray(c_y_pred.detach().cpu()), np.asarray(c_z_pred.detach().cpu())
+		)
 	
 
 def run_pipeline_cvae(
@@ -361,6 +389,14 @@ def run_pipeline_cvae(
 				x_ell.cpu().numpy(), y_ell.cpu().numpy(), z_ell.cpu().numpy(), 
 				a_ell.cpu().numpy(), b_ell.cpu().numpy(), c_ell.cpu().numpy()
 			)
+		elif comp_type == "base_init":
+			primal_sol_x_base, primal_sol_y_base, primal_sol_z_base, primal_residual_base, dual_residual_base = jax.block_until_ready(multi_agent_base.solve(
+				c_x_pred_jnp, c_y_pred_jnp, c_z_pred_jnp, 
+				jnp.zeros_like(lamda_x_jnp), jnp.zeros_like(lamda_y_jnp), jnp.zeros_like(lamda_z_jnp), 
+				state_x_test_jnp, state_y_test_jnp, state_z_test_jnp,
+				x_ell.cpu().numpy(), y_ell.cpu().numpy(), z_ell.cpu().numpy(), 
+				a_ell.cpu().numpy(), b_ell.cpu().numpy(), c_ell.cpu().numpy()
+			))
 		elif comp_type == "sf_cpred":
 			primal_sol_x_base, primal_sol_y_base, primal_sol_z_base, _, _, primal_residual_base, dual_residual_base = jax.block_until_ready(multi_agent_learned(
 				c_x_pred_jnp, c_y_pred_jnp, c_z_pred_jnp, 
@@ -441,6 +477,18 @@ def run_pipeline_cvae(
 		ddot_base = jnp.stack([x_ddot_base, y_ddot_base, z_ddot_base], axis=-1)
 		mean_smoothness_base = jnp.linalg.norm(ddot_base, axis=-1).sum(axis=-1).mean()
 
+		x_traj_batch = np.dot(primal_sol_x.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_batch = np.dot(primal_sol_y.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_batch = np.dot(primal_sol_z.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
+		x_traj_base_batch = np.dot(primal_sol_x_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_base_batch = np.dot(primal_sol_y_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_base_batch = np.dot(primal_sol_z_base.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
+		x_traj_cpred = np.dot(c_x_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		y_traj_cpred = np.dot(c_y_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+		z_traj_cpred = np.dot(c_z_pred_jnp.reshape(batch_size, multi_agent_learned.num_agent, multi_agent_learned.nvar), multi_agent_learned.P.T)
+
 		return (
 			primal_residual[:, best_idx], primal_residual_base[:, best_idx_base], 
 			dual_residual[:, best_idx], dual_residual_base[:, best_idx_base]
@@ -448,5 +496,13 @@ def run_pipeline_cvae(
 			x_traj, y_traj, z_traj,
 			x_traj_base, y_traj_base, z_traj_base,
 			x_traj_init, y_traj_init, z_traj_init,
-		), (mean_smoothness, mean_smoothness_base)
+		), (mean_smoothness, mean_smoothness_base), (
+			x_traj_cpred, y_traj_cpred, z_traj_cpred, 
+			x_traj_batch, y_traj_batch, z_traj_batch, 
+			x_traj_base_batch, y_traj_base_batch, z_traj_base_batch, 
+			np.asarray(primal_residual).T, np.asarray(dual_residual).T
+		), (
+			np.asarray(primal_sol_x), np.asarray(primal_sol_y), np.asarray(primal_sol_z), 
+			np.asarray(c_x_pred.detach().cpu()), np.asarray(c_y_pred.detach().cpu()), np.asarray(c_z_pred.detach().cpu())
+		)
 	

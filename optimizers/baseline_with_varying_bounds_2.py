@@ -16,7 +16,7 @@ import jax
 
 class multi_agent_qp_node_base():
 
-	def __init__(self, num_agent, num_batch=2):
+	def __init__(self, num_batch, num_agent):
 
 		self.num_agent = num_agent
 		self.num_batch = num_batch
