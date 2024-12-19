@@ -77,10 +77,10 @@ def run_pipeline(
 
 		latent = vq_model.quantizer.embedding(latent_idx.to(dtype=th.int32))[:, 0]
 
-		if verbose:
-			print(f"{'PixelCNN sampling time':<30}: {(perf_counter() - start):.4f} secs")
+		# if verbose:
+		# 	print(f"{'PixelCNN sampling time':<30}: {(perf_counter() - start):.4f} secs")
 		
-		start = perf_counter()
+		# start = perf_counter()
 		c_pred = vq_model.decode(
 			latent, 
 			x_init.repeat_interleave(batch_size, 0), y_init.repeat_interleave(batch_size, 0), z_init.repeat_interleave(batch_size, 0), 
@@ -274,7 +274,8 @@ def run_pipeline(
 			x_traj_cpred, y_traj_cpred, z_traj_cpred, 
 			x_traj_batch, y_traj_batch, z_traj_batch, 
 			x_traj_base_batch, y_traj_base_batch, z_traj_base_batch, 
-			np.asarray(primal_residual).T, np.asarray(dual_residual).T
+			np.asarray(primal_residual).T, np.asarray(dual_residual).T,
+			np.asarray(primal_residual_base).T, np.asarray(dual_residual_base).T
 		), (
 			np.asarray(primal_sol_x), np.asarray(primal_sol_y), np.asarray(primal_sol_z), 
 			np.asarray(c_x_pred.detach().cpu()), np.asarray(c_y_pred.detach().cpu()), np.asarray(c_z_pred.detach().cpu())
@@ -500,7 +501,8 @@ def run_pipeline_cvae(
 			x_traj_cpred, y_traj_cpred, z_traj_cpred, 
 			x_traj_batch, y_traj_batch, z_traj_batch, 
 			x_traj_base_batch, y_traj_base_batch, z_traj_base_batch, 
-			np.asarray(primal_residual).T, np.asarray(dual_residual).T
+			np.asarray(primal_residual).T, np.asarray(dual_residual).T,
+			np.asarray(primal_residual_base).T, np.asarray(dual_residual_base).T
 		), (
 			np.asarray(primal_sol_x), np.asarray(primal_sol_y), np.asarray(primal_sol_z), 
 			np.asarray(c_x_pred.detach().cpu()), np.asarray(c_y_pred.detach().cpu()), np.asarray(c_z_pred.detach().cpu())

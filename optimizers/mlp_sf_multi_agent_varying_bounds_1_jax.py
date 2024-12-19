@@ -205,7 +205,7 @@ class mlp_sf_multi_agent_jax:
 
 		return b_eq_x, b_eq_y, b_eq_z
 		
-	# @partial(jit, static_argnums=(0,))
+	@partial(jit, static_argnums=(0,))
 	# @partial(jax.vmap, in_axes=(None,)+tuple(0 for _ in range(21)))
 	def compute_x(self, c_x_pred, c_y_pred, c_z_pred, d_agent, alpha_agent, beta_agent, lamda_x, lamda_y, lamda_z, b_eq_x, b_eq_y, b_eq_z,  x_ell, y_ell, z_ell, a_ell, b_ell, c_ell, alpha_ell, beta_ell, d_ell):
 
@@ -232,7 +232,7 @@ class mlp_sf_multi_agent_jax:
 		
 		return primal_sol_x, primal_sol_y, primal_sol_z 
 		
-	# @partial(jit, static_argnums=(0,))
+	@partial(jit, static_argnums=(0,))
 	# @partial(jax.vmap, in_axes=(None,)+tuple(0 for _ in range(12)))
 	def compute_alpha_d(self, primal_sol_x, primal_sol_y, primal_sol_z, lamda_x, lamda_y, lamda_z, x_ell, y_ell, z_ell, a_ell, b_ell, c_ell):
 	 
